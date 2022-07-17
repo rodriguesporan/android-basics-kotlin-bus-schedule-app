@@ -13,18 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.busschedule
+package com.example.busschedule.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.busschedule.database.schedule.BusScheduleApplication
 import com.example.busschedule.databinding.FullScheduleFragmentBinding
+import com.example.busschedule.viewmodel.BusScheduleViewModel
+import com.example.busschedule.viewmodel.BusScheduleViewModelFactory
 
 class FullScheduleFragment: Fragment() {
+
+    private val viewModel: BusScheduleViewModel by activityViewModels {
+        BusScheduleViewModelFactory(
+                (activity?.application as BusScheduleApplication).database.scheduleDao()
+        )
+    }
 
     private var _binding: FullScheduleFragmentBinding? = null
 
@@ -46,6 +57,13 @@ class FullScheduleFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val busStopAdapter = BusStopAdapter {
+            val action = FullScheduleFragmentDirections.actionFullScheduleFragmentToStopScheduleFragment(
+                    stopName = it.stopName
+            )
+            view.findNavController().navigate(action)
+        }
+        recyclerView.adapter = busStopAdapter
     }
 
     override fun onDestroyView() {
